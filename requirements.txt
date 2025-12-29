@@ -1,4 +1,5 @@
 duckdb
 pandas
+kaggle
 pyarrow
 pyyaml
