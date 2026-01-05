@@ -29,3 +29,12 @@ jobs:
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
         run: |
           python pipelines/ingest.py
+      
+      - name: Run ETL pipeline
+        run: |
+          python pipelines/extract.py
+          python pipelines/transform.py
+
+      - name: Run data quality checks
+        run: |
+          python pipelines/run_quality_checks.py
