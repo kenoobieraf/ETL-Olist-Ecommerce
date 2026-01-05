@@ -34,18 +34,55 @@ con.execute("""
         o.order_status,
         o.order_purchase_timestamp,
         o.order_delivered_customer_date,
+        o.order_delivered_carrier_date,
+        o.order_estimated_delivery_date,
+        o.order_approved_at,
 
-        DATE_DIFF(
-            'day',
-            o.order_purchase_timestamp,
-            o.order_delivered_customer_date
-        ) AS order_cycle_time_days
+    DATE_DIFF(
+        'day',
+        o.order_purchase_timestamp,
+        o.order_delivered_customer_date
+    ) AS order_cycle_time_days,
+    
+    DATE_DIFF(
+        'day',
+        o.order_estimated_delivery_date,
+        o.order_delivered_customer_date
+    ) AS delivery_delay_days
 
-    FROM raw_orders o
-    LEFT JOIN raw_order_items oi
-        ON o.order_id = oi.order_id
+FROM raw_orders o
+LEFT JOIN raw_order_items oi
+    ON o.order_id = oi.order_id
 """)
 
+
+con.execute("""
+CREATE OR REPLACE TABLE dim_sellers AS
+SELECT DISTINCT
+    seller_id,
+    seller_city,
+    seller_state
+FROM raw_sellers
+""")
+
+con.execute("""
+CREATE OR REPLACE TABLE dim_products AS
+SELECT DISTINCT
+    product_id,
+    product_category_name,
+    product_weight_g
+FROM raw_products
+""")
+
+con.execute("""
+CREATE OR REPLACE TABLE dim_payments AS
+SELECT
+    order_id,
+    payment_type,
+    payment_installments,
+    payment_value
+FROM raw_payments
+""")
 
 for table, file in raw_tables.items():
     con.execute(f"""
